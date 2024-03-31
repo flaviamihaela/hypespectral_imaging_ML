@@ -93,7 +93,7 @@ output = np.zeros(copy_data_log.shape)
 w = output.shape[1]
 h = output.shape[0]
 
-# Apply thresholding to identify edges
+# Apply thresholding to identify edges and obtain an edge image
 for y in range(1, h - 1):
     for x in range(1, w - 1):
         patch = copy_data_log[y-1:y+2, x-1:x+2]
@@ -131,7 +131,7 @@ sel[output] = copy_data[output]
 #spare_data[spare_data<50.302734] = np.nan
 
 # Mask application and spectral signature extraction
-mask_log=(copy_data<50.302734) # Create a mask based on found threshold
+mask_log=(copy_data<50.302734) # Create a mask based on found threshold from edge image
 viewer = skimage.viewer.ImageViewer(mask_log)
 viewer.show()
 sel2 = np.zeros_like(copy_data)
