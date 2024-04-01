@@ -1,6 +1,4 @@
-#Gabor Features Independent
-
-#import libraries and modules
+# Import necessary libraries and modules
 from spectral import imshow, view_cube
 import spectral.io.envi as envi
 import numpy as np
@@ -32,14 +30,16 @@ from sklearn import preprocessing
 import scipy
 from cv2 import filter2D as _do_convolve
 
-#define functions
+# Function to calculate the mean spectral signature for masked regions based on a threshold
 def calculate_mean_masked_spectra(reflArray,cop,cop_threshold,ineq='>'):
 
-    mean_masked_refl = np.zeros(reflArray.shape[2])
+    mean_masked_refl = np.zeros(reflArray.shape[2]) # Initialize array for mean spectral values
 
+    # Iterate through each spectral band
     for i in np.arange(reflArray.shape[2]):
-        refl_band = reflArray[:,:,i]
+        refl_band = reflArray[:,:,i] # Extract the current band
 
+         # Apply mask based on the threshold and condition (greater or less than)
         if ineq == '>':
             cop_mask = ma.masked_where((cop<=cop_threshold) | (np.isnan(cop)),cop)
         elif ineq == '<':
@@ -47,45 +47,49 @@ def calculate_mean_masked_spectra(reflArray,cop,cop_threshold,ineq='>'):
         else:
             print('ERROR: Invalid inequality. Enter < or >')
 
+        # Calculate mean reflectance of the masked band
         masked_refl = ma.MaskedArray(refl_band,mask=cop_mask.mask)
         mean_masked_refl[i] = ma.mean(masked_refl)
 
     return mean_masked_refl
 
+# Function for Standard Normal Variate (SNV) transformation
 def snv(input_data):
-    data_snv = np.zeros_like(input_data)
+    data_snv = np.zeros_like(input_data) # Initialize array for SNV data
+    # Apply SNV transformation to each sample
     for i in range(data_snv.shape[0]):
         data_snv[i] = (input_data[i] - np.mean(input_data)) / np.std(input_data)
     return (data_snv)
 
-
+# Function to apply a mask across all spectral bands of a data array
 def masked_spectra(reflArray, mask):
     
-    M = np.zeros(reflArray.shape)
+    M = np.zeros(reflArray.shape) # Initialize array for masked data
 
+    # Apply the mask to each spectral band
     for i in np.arange(reflArray.shape[2]):
         refl_band = reflArray[:,:,i]
         M_band =M[:,:,i]
-        M_band[mask] = refl_band[mask]
-        
-
+        M_band[mask] = refl_band[mask] # Apply mask to the current band
+    
     return M
 
 
-#START PROCESSING
+# START OF MAIN PROCESSING
 
-#read .raw file
+# Load hyperspectral data from specified file paths
 data_ref = envi.open(r"C:\Users\FlaviaMihaela\Desktop\PLNT_BRSNN_CHRGR_INOCL_21dai_06.hdr", r"C:\Users\FlaviaMihaela\Desktop\PLNT_BRSNN_CHRGR_INOCL_21dai_06.raw")
-data= np.array(data_ref.load())
+data= np.array(data_ref.load()) # Convert data to a NumPy array
 
-
-#apply laplacian-gaussian blur then otsu thresholding
-copy_data=data[:,:,25]
+# Apply Laplacian-Gaussian filter to enhance features and apply thresholding
+copy_data=data[:,:,25] # Select a specific band for processing
 #plt.hist(copy_data)
 #plt.show()
-copy_data_log=ndimage.gaussian_laplace(copy_data, sigma=11)
+copy_data_log=ndimage.gaussian_laplace(copy_data, sigma=11) # Apply LoG filter
 #plt.imshow(copy_data,cmap='gray', interpolation='nearest')
-thres = np.absolute(copy_data_log).mean() * 0.75
+thres = np.absolute(copy_data_log).mean() * 0.75 # Determine threshold for feature detection'
+
+# Detect features using zero-crossing method
 output = np.zeros(copy_data_log.shape)
 w = output.shape[1]
 h = output.shape[0]
@@ -104,9 +108,9 @@ for y in range(1, h - 1):
 #plt.rcParams["axes.grid"] = False
 #plt.imshow(output, cmap='gray')
 #plt.show()
-output=output.astype('bool')
+output=output.astype('bool') # Convert output to a boolean array for masking
 sel = np.zeros_like(copy_data)
-sel[output] = copy_data[output]
+sel[output] = copy_data[output] # Apply the detected features as a mask
 #plt.hist(sel)
 #plt.show()
 
@@ -119,36 +123,38 @@ sel[output] = copy_data[output]
 #print(m_otsu_t)
 
 
-#Obtaining the mask
+# Obtain a mask based on a specific threshold and apply it to the data
 spare_data=copy_data
-spare_data[spare_data<52.29492] = np.nan
-mask_log=(copy_data>52.29492)
+spare_data[spare_data<52.29492] = np.nan # Set values below threshold to NaN
+mask_log=(copy_data>52.29492) # Create a binary mask for values above the threshold
 #viewer = skimage.viewer.ImageViewer(mask_log)
 #viewer.show()
 sel2 = np.zeros_like(copy_data)
-sel2[mask_log] = copy_data[mask_log]
+sel2[mask_log] = copy_data[mask_log] # Apply the mask
 #plt.imshow(sel2, cmap='gray', interpolation='nearest')
 
 
-#Obtain the segmented 3D image by applying the mask on all bands
+# Obtain the segmented 3D image by applying the mask on all bands
 m_data=masked_spectra(data,mask_log)
 #v1= imshow(m_data, (12,9,3), stretch=(0.03, 0.99), figsize= (5,5))
 #plt.show()
 
 
-#Generate gabor filter bank
+# Generate a Gabor filter bank and apply it to each spectral band
 num=1
-df_r=pd.DataFrame()
-df_i=pd.DataFrame()
-frequency=0.2
+df_r=pd.DataFrame() # DataFrame to store real parts of Gabor-filtered images
+df_i=pd.DataFrame() # DataFrame to store imaginary parts of Gabor-filtered images
+frequency=0.2 # Frequency for Gabor filter
 for i in np.arange(m_data.shape[2]):
-    test = m_data[:,:,i]
+    test = m_data[:,:,i] # Extract a spectral band
+    # Iterate over angles for Gabor filter
     for theta in np.arange(0, np.pi, np.pi/4):
+        # Apply Gabor filter
         r,i= filters.gabor(test, 0.2, theta=0)
-        r=r.reshape(-1)
-        i=i.reshape(-1)
-        df_r[num]= r
-        df_i[num]=i
+        r=r.reshape(-1) # Flatten the real part
+        i=i.reshape(-1) # Flatten the imaginary part
+        df_r[num]= r # Store the real part in DataFrame
+        df_i[num]=i # Store the imaginary part in DataFrame
         num+=1
     
         

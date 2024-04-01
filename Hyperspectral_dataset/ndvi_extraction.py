@@ -1,5 +1,3 @@
-#Extract spectral signature with NDVI mask
-
 # Import necessary libraries and modules
 from spectral import imshow, view_cube
 import spectral.io.envi as envi
@@ -92,7 +90,7 @@ plt.imshow(ndvi_c) # Display NDVI with applied threshold
 
 # Extract mean spectral signature of leaf after using NDVI mask
 w= [420, 440, 460, 480, 500, 520, 530, 540, 550, 560, 580, 590, 600, 610, 620, 630, 650, 670, 690, 710, 720, 730, 740, 750, 760, 770, 780, 790, 800, 830, 860, 890, 900, 930, 960]
-extr_ndvi = calculate_mean_masked_spectra(data,ndvi,0.84657586)
+extr_ndvi = calculate_mean_masked_spectra(data,ndvi,0.15)
 extr_ndvi_df = pd.DataFrame()
 extr_ndvi_df['wavelength'] = w
 extr_ndvi_df['mean_refl_ndvi'] = (extr_ndvi/255)*100

@@ -1,5 +1,3 @@
-#Extract spectral signature with Laplacian of Gaussian
-
 # Import necessary libraries and modules
 from spectral import imshow, view_cube
 import spectral.io.envi as envi
@@ -76,7 +74,6 @@ data_ref = envi.open(r"C:\Users\FlaviaMihaela\Desktop\PLNT_BRSNN_CHRGR_INOCL_06d
 # Convert data to NumPy array for processing
 data= np.array(data_ref.load())
 
-
 # Resize image if needed
 #data=data[1000:1800,500:1400,:]
 
@@ -118,7 +115,7 @@ sel[output] = copy_data[output]
 
 
 # Multiple thresholding using otsu's method
-#m_otsu_t= filters.threshold_multiotsu(sel)
+m_otsu_t= filters.threshold_multiotsu(sel)
 #regions = np.digitize(copy_data, bins=m_otsu_t)
 #plt.imshow(regions, cmap='Accent')
 #plt.show()
