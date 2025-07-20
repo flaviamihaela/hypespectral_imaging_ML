@@ -48,9 +48,11 @@ PART 1:
 | `osavi_extraction.py`       | Generates an **OSAVI mask** (`OSAVI > thr`) then SG‑smooths the extracted spectra                      | `osavi_mask.png`, `osavi_spectra.csv`           |
 
 LoG extraction
+
 <img width="196" height="255" alt="image" src="https://github.com/user-attachments/assets/fe1801ea-e86d-406b-ac79-c710b8bdb01c" />
 
 Index extraction
+
 <img width="198" height="259" alt="image" src="https://github.com/user-attachments/assets/65529cb5-b123-4f82-879a-76c162ff228d" />
 
 
