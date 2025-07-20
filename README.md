@@ -27,6 +27,8 @@ PART 1:
  PART 2:
 - Indian Pines (IP) used to prove the compression (dimensionality reduction) and classification steps;
 
+Following link describes the datasets in more detail: <link> https://github.com/flaviamihaela/hypespectral_imaging_ML/wiki/Datasets </link>
+
 ## PART 1 - Pre processing workflow - LLS dataset:
 
 - Denoises every spectral band (Gaussian)
@@ -56,14 +58,7 @@ Index extraction
 <img width="198" height="259" alt="image" src="https://github.com/user-attachments/assets/65529cb5-b123-4f82-879a-76c162ff228d" />
 
 
-
-
-
-
-
-Following link describes the datasets in more detail: <link> https://github.com/flaviamihaela/hypespectral_imaging_ML/wiki/Datasets </link>
-
-## Part 1 LLS dataset
+## Part 2 = ML Pipeline - Indian Pines dataset:
 
 
 
